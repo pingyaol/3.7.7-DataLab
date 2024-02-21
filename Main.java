@@ -5,6 +5,8 @@ import java.lang.*;
 import java.io.BufferedReader; 
 import java.io.FileReader; 
 import java.io.IOException; 
+import core.data.*;
+
 
 // import javafx.application.Application;
 // import javafx.scene.Scene;
@@ -39,18 +41,27 @@ public class Main {
       return temp;
   }
 
-
   public static void main(String[] args) {
-    String fileName = "spotify-2023.csv"; 
-    File file= new File(fileName);
 
-    // this gives you a 2-dimensional array of strings
-    ArrayList<List<String>> lines = new ArrayList<>();
-    HashMap<String, Integer> uniqueArtists = new HashMap<String, Integer>();
-    Scanner inputStream;
+    DataSource ds1 = DataSource.connectAs("CSV", "./spotify-2023.csv");
+    ds1.load();
+    ds1.printUsageString(); 
+    String[] streams = ds1.fetchStringArray("streams");
+    String[] titles = ds1.fetchStringArray("track_name"); 
+
+    // for (int i = 0; i < titles.length; i++) {
+    //   System.out.println(titles[i]);
+    // }
+
+    System.out.println("len2: " + streams.length); 
+    System.out.println("len3: " + titles.length); 
+
+    // GETTING ARTISTS 
+    HashMap<String, Integer> uniqueArtists = new HashMap<String, Integer>(); 
+    ArrayList<ArrayList<String>> artists = new ArrayList<ArrayList<String>>(); 
 
     try(BufferedReader fileReader
-            = new BufferedReader(new FileReader(fileName)))
+            = new BufferedReader(new FileReader("arts.csv")))
     {
       String line = "";
 
@@ -60,32 +71,10 @@ public class Main {
         //Get all tokens available in line
         String[] tokens = line.split(",");
         ArrayList<String> tokensArrList = new ArrayList<String>(Arrays.asList(tokens)); 
+        artists.add(tokensArrList); 
 
         //Verify tokens
         System.out.println(Arrays.toString(tokens));
-        lines.add(tokensArrList); 
-      }
-    }
-    catch (IOException e) {
-      e.printStackTrace();
-    }
-
-
-    // read all the artists into a hashmap 
-    try(BufferedReader fileReader
-            = new BufferedReader(new FileReader("artists.csv")))
-    {
-      String line = "";
-
-      //Read the file line by line
-      while ((line = fileReader.readLine()) != null)
-      {
-        //Get all tokens available in line
-        String[] tokens = line.split(",");
-        ArrayList<String> tokensArrList = new ArrayList<String>(Arrays.asList(tokens)); 
-
-        //Verify tokens
-        // System.out.println(Arrays.toString(tokens));
           for (String artist : tokensArrList) {
           if (uniqueArtists.containsKey(artist)) {
             System.out.println("(Before) Key = " + artist + 
@@ -103,13 +92,16 @@ public class Main {
       e.printStackTrace();
     }
 
-    // print out artist-count pairs 
-    // Map<String, Integer> uniqueArtists1 = sortByValue(uniqueArtists);
-    // for (Map.Entry<String, Integer> arts : uniqueArtists1.entrySet()) {
-    //     System.out.println("Key = " + arts.getKey() + 
-    //                   ", Value = " + arts.getValue());
-    // }
-
+    // CHECKS IF ALL THE ARTISTS ARE MATCHED UP WITH THE RIGHT INFO 
+    for (int i = 0; i < 5; i++) {
+      for (int j = 0; j < artists.size() - 1; j++) {
+        System.out.print(artists.get(j).toString()); 
+        System.out.print(" TITLE: "); 
+        System.out.print(titles[j]); 
+        System.out.print(" STREAMS: "); 
+        System.out.println(streams[j]); 
+      }
+    }
 
 
   }
